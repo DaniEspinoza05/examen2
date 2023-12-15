@@ -1,0 +1,185 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://wwww.thymeleaf.org" 
+      xmlns:sec="http://thymeleaft.org/extras/spring-security">
+    <head th:replace="~{layout/plantilla :: head}">
+        <title>Examen 2</title>
+    </head>
+    <body>
+        <section th:fragment="botonesAgregar" class="py-4 mb-4 bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3" sec:authorize="hasRole('ROLE_ADMIN')">   
+                        <button 
+                            type="button" 
+                            class="btn btn-primary btn-block" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#agregarCarro">
+                            <i class="fas fa-plus"></i> [[#{accion.agregar}]]
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section th:fragment="agregarCarro">
+            <div id="agregarCarro" class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title" th:text="#{accion.agregar}">Agregar Carro</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div> 
+                        <form th:action="@{/carro/guardar}" th:object="${carro}"
+                              method="POST" class="was-validated">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="idCarro" th:text="#{carro.idCarro}">Id</label>
+                                    <input type="number" class="form-control" name="idCarro" required="true"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="descripcion" th:text="#{carro.descripcion}">descripcion</label>
+                                    <input type="text" class="form-control" name="descripcion" required="true"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cilindros" th:text="#{carro.cilindros}">Cilindros</label>
+                                    <input type="number" class="form-control" name="cilindros" required="true"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="modelo" th:text="#{carro.modelo}">Modelo</label>
+                                    <input type="date" class="form-control" name="modelo"/>
+                                </div>                                
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary" type="submit" th:text="#{accion.guardar}">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>        
+
+        <section th:fragment="listadoCarros" id="carros">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>[[#{carro.titulo}]]</h4>
+                            </div>
+                            <div th:if="${carros != null and !carros.empty}">
+                                <table class="table table-stryped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th th:text="#{carro.idCarro}">Id</th>
+                                            <th th:text="#{carro.descripcion}">Descripcion</th>
+                                            <th th:text="#{carro.cilindros}">Cilindros</th>
+                                            <th th:text="#{carro.modelo}">Modelo</th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="carro : ${carros}">
+                                            <td>[[${carro.idCarro}]]</td>
+                                            <td>[[${carro.descripcion}]]</td>
+                                            <td>[[${carro.cilindros}]]</td>
+                                            <td>[[${carro.modelo}]]</td>
+                                            <td>
+                                                <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/carro/eliminar/}+${carro.idCarro}"
+                                                   class="btn btn-danger">
+                                                    <i class="fas fa-trash-can"></i> [[#{accion.eliminar}]]
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/carro/modificar/}+${carro.idCarro}"
+                                                   class="btn btn-success">
+                                                    <i class="fas fa-pencil"></i> [[#{accion.actualizar}]]
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center p-2" th:if="${carros == null or carros.empty}">
+                                <span th:text="#{carro.no_mostrar}">Lista vacía</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">                        
+                        <div class="card text-center bg-success text-white mb-3">
+                            <div class="card-body">
+                                <h3 th:text="#{carro.totalCarros}">Total Carros</h3>
+                                <h4 class="fs-2">
+                                    <i class="fas fa-users"></i> [[${totalCarros}]]
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section th:fragment="editarCarro">            
+            <form method="POST"
+                  th:action="@{/carro/guardar}"
+                  th:object="${carro}"
+                  class="was-validated">
+                <input type="hidden" name="idCarro" th:field="*{idCarro}"/> 
+                <section th:replace="carro/fragmentosCarro :: botonesEditar"/> 
+                <div id="details"> 
+                    <div class="container"><div class="row">
+                            <div class="col"><div class="card">
+                                    <div class="card-header">
+                                        <h4>[[#{accion.actualizar}]]</h4>
+                                    </div>
+                                    <div class="card-body">                                        
+                                        <div class="form-group">
+                                            <label for="descripcion" th:text="#{carro.descripcion}">Descripcion: </label>
+                                            <input type="text" class="form-control" name="descripcion" th:field="*{descripcion}"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cilindros" th:text="#{carro.cilindros}">Cilindros: </label>
+                                            <input type="number"  class="form-control" name="cilindros" th:field="*{cilindros}"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modelo" th:text="#{carro.modelo}">Modelo: </label>
+                                            <input type="date"  class="form-control" name="modelo" th:field="*{modelo}"/>
+                                        </div>                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <section th:fragment="botonesEditar">
+            <div id="actions" class="py-4 mb-4 bg-light">
+                <div class="container">
+                    <div class="row">
+                        <div class="d-grid col-md-2 mx-auto">
+                            <a th:href="@{/carro/listado}" class="btn btn-ligth btn-block">
+                                <i class="fas fa-arrow-left"></i> [[#{accion.regresar}]]
+                            </a>
+                        </div>
+                        <div class="d-grid col-md-2 mx-auto">
+                            <button type="submit" class="btn btn-success btn-block">
+                                <i class="fas fa-check"></i> [[#{accion.guardar}]]
+                            </button>
+                        </div>
+                        <div class="d-grid col-md-2 mx-auto">
+                            <a th:href="@{/carro/eliminar/}+${carro.idCarro}"
+                               class="btn btn-danger btn-block">
+                                <i class="fas fa-trash"></i> [[#{accion.eliminar}]]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </body>
+</html>
